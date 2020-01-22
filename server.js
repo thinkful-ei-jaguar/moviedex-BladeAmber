@@ -1,11 +1,16 @@
 require('dotenv').config();
 const express = require('express');
 const morgan = require('morgan');
+const movies = require('./movies.json');
+const cors = require('cors');
+const helmet = require('helmet');
 
 const app = express();
-let movies = require('./movies.json');
+
 
 app.use(morgan('dev'));
+app.use(cors());
+app.use(helmet())
 
 app.use(function validateBearerToken(req, res, next) {
   
@@ -20,28 +25,31 @@ app.use(function validateBearerToken(req, res, next) {
   next();
 });
 
-const getMovies = (req, res) => {
-  const { genre, country, avg_vote } = req.query;
-  console.log(genre, country, avg_vote);
+function getMovies (req, res) {
+  let { genre, country, avg_vote } = req.query;
+
+  let response = movies;
 
   if (genre) {
-    movies = movies.filter(movie => {
+    response = response.filter(movie => {
       return movie.genre.toLowerCase().includes(genre.toLowerCase());
     });
   }
 
   if (country) {
-    movies = movies.filter(movie => {
+    response = response.filter(movie => {
       return movie.country.toLowerCase().includes(country.toLowerCase());
     });
   }
 
   if (avg_vote) {
-
+    response = response.filter(movie =>
+      Number(movie.avg_vote) >= Number(req.query.avg_vote)
+    );
   }
 
-  res.json(movies);
-};
+  res.json(response);
+}
 
 
 
