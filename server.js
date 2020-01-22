@@ -3,7 +3,7 @@ const express = require('express');
 const morgan = require('morgan');
 
 const app = express();
-const movies = require('./movies');
+let movies = require('./movies.json');
 
 app.use(morgan('dev'));
 
@@ -21,6 +21,25 @@ app.use(function validateBearerToken(req, res, next) {
 });
 
 const getMovies = (req, res) => {
+  const { genre, country, avg_vote } = req.query;
+  console.log(genre, country, avg_vote);
+
+  if (genre) {
+    movies = movies.filter(movie => {
+      return movie.genre.toLowerCase().includes(genre.toLowerCase());
+    });
+  }
+
+  if (country) {
+    movies = movies.filter(movie => {
+      return movie.country.toLowerCase().includes(country.toLowerCase());
+    });
+  }
+
+  if (avg_vote) {
+
+  }
+
   res.json(movies);
 };
 
@@ -28,7 +47,7 @@ const getMovies = (req, res) => {
 
 app.get('/movie', getMovies);
 
-const PORT = 8000;
+
 
 app.listen(8001, () => {
   console.log('Server listening at http://localhost: 8001');
